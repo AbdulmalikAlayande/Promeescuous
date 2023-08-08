@@ -4,6 +4,7 @@ package africa.semicolon.promeescuous.utils;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
 
 import java.io.IOException;
 import java.net.URI;
@@ -46,5 +47,15 @@ public class AppUtil {
 								  .append(queryStringPrefix)
 				                  .append(queryStringKey)
 								  .append(validationToken).toString();
+	}
+	
+	public static String extractEmailFromToken(String token){
+		Claim claim = JWT.decode(token).getClaim("user mail");
+		return claim.asMap().get("user mail").toString();
+	}
+	
+	public static String isValidToken(String token){
+//		JWT.require(Algorithm.HMAC512("secret")).withIssuer("Promiscuous Incorporation").withClaim()
+		return null;
 	}
 }
