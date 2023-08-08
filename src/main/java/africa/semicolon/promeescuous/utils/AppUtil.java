@@ -35,7 +35,16 @@ public class AppUtil {
 	}
 	
 	public static String generateActivationLink(String email){
-		// https:localhost:8080/activate?=validationToken
-		return null;
+		// validationToken
+		String baseUrl = "https:localhost:8080";
+		String activationPath = "/activate";
+		char queryStringPrefix = '?';
+		String queryStringKey = "code=";
+		String validationToken = generateValidationToken(email);
+		return new StringBuilder().append(baseUrl)
+								  .append(activationPath)
+								  .append(queryStringPrefix)
+				                  .append(queryStringKey)
+								  .append(validationToken).toString();
 	}
 }
