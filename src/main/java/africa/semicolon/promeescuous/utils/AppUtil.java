@@ -2,6 +2,7 @@ package africa.semicolon.promeescuous.utils;
 
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 
 import java.io.IOException;
@@ -18,14 +19,13 @@ public class AppUtil {
 	private static final String TEMPLATE_FILE_PATH  = "C:\\Users\\USER\\IdeaProjects\\promeescuous\\promiscuous\\src\\main\\resources\\templates\\index.html";
 	
 	public static String generateValidationToken(String email){
-		JWT.create()
+		JWTCreator.Builder tokenCreator = JWT.create()
 				.withClaim("user mail", email)
 				.withExpiresAt(Instant.now().plusSeconds(3600))
 				.withIssuer("Promiscuous Incorporation")
 				.withIssuedAt(Instant.now())
-				.withHeader("")
-				.sign(Algorithm.HMAC512("secret"));
-		return "";
+				.withHeader("");
+		return tokenCreator.sign(Algorithm.HMAC512("secret"));
 	}
 	
 	public static String getMailTemplate() throws URISyntaxException, IOException {
@@ -35,6 +35,7 @@ public class AppUtil {
 	}
 	
 	public static String generateActivationLink(String email){
+		// https:localhost:8080/activate?=validationToken
 		return null;
 	}
 }
