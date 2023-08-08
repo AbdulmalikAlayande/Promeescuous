@@ -6,6 +6,7 @@ import africa.semicolon.promeescuous.models.User;
 import africa.semicolon.promeescuous.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.net.URISyntaxException;
 public class PromiscuousUserService implements UserService{
     private final UserRepository userRepository;
     private final MailService mailService;
+    private final ModelMapper mapper;
 
     @Override
     public RegisterUserResponse register(RegisterUserRequest registerUserRequest) throws URISyntaxException, IOException {
