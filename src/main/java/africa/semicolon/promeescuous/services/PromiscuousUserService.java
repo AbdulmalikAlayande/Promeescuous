@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 @Repository
 @AllArgsConstructor
 @Slf4j
@@ -16,7 +19,7 @@ public class PromiscuousUserService implements UserService{
     private final MailService mailService;
 
     @Override
-    public RegisterUserResponse register(RegisterUserRequest registerUserRequest) {
+    public RegisterUserResponse register(RegisterUserRequest registerUserRequest) throws URISyntaxException, IOException {
         String email = registerUserRequest.getEmail();
         String password = registerUserRequest.getPassword();
         User user = new User();

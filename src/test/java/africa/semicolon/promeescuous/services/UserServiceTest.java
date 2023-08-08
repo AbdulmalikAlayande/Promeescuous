@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
@@ -15,7 +18,7 @@ public class UserServiceTest {
     private UserService userService;
 
     @Test
-    public void testThatUserCanRegister(){
+    public void testThatUserCanRegister() throws URISyntaxException, IOException {
         //user fills registration form
         RegisterUserRequest registerUserRequest = new RegisterUserRequest();
         registerUserRequest.setEmail("test@email.com");

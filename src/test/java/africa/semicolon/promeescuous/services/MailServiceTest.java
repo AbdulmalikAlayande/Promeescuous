@@ -39,5 +39,5 @@ public class MailServiceTest {
         EmailNotificationResponse emailNotificationResponse = mailService.send(request);
         log.info("response:: {}", emailNotificationResponse);
         assertNotNull(emailNotificationResponse);
-    }
+    }       
 }
