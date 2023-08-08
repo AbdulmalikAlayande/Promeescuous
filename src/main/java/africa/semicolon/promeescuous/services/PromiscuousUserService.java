@@ -29,11 +29,11 @@ public class PromiscuousUserService implements UserService{
         user.setPassword(password);
         User savedUser = userRepository.save(user);
         log.info("saved guy-->{}", savedUser);
-        String emailResponse=mailService.send(savedUser);
+        String emailResponse = mailService.send(savedUser);
         log.info("email sending response->{}", emailResponse);
         RegisterUserResponse registerUserResponse = new RegisterUserResponse();
         registerUserResponse.setMessage("Registration Successful, check your email inbox for verification token");
-
+        
         return registerUserResponse;
     }
 }
