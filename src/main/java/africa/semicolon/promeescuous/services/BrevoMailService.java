@@ -5,13 +5,19 @@ import africa.semicolon.promeescuous.dtos.requests.EmailNotificationRequest;
 import africa.semicolon.promeescuous.dtos.requests.Recipient;
 import africa.semicolon.promeescuous.dtos.responses.EmailNotificationResponse;
 import africa.semicolon.promeescuous.models.User;
+import africa.semicolon.promeescuous.utils.AppUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +25,6 @@ import java.util.List;
 @Slf4j
 @AllArgsConstructor
 public class BrevoMailService implements MailService{
-
     private final AppConfig appConfig;
     @Override
     public EmailNotificationResponse send(EmailNotificationRequest emailNotificationRequest) {
@@ -36,12 +41,13 @@ public class BrevoMailService implements MailService{
     }
     
     @Override
-    public String send(User user) {
+    public String send(User user) throws URISyntaxException, IOException {
         EmailNotificationRequest notificationRequest = new EmailNotificationRequest();
-        notificationRequest.setMailContent("<p>Hello Sending With Brevo<p>");
+        notificationRequest.setMailContent(AppUtil.getMailTemplate());
         Recipient recipient = new Recipient(user.getEmail());
         notificationRequest.setRecipients(List.of(recipient));
         EmailNotificationResponse response = send(notificationRequest);
         return response.getMessageId();
     }
+    
 }
