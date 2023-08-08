@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,7 +23,7 @@ public class MailServiceTest {
 
     @BeforeEach
     public void setUp(){
-        String recipientEmail = "rofime9859@royalka.com";
+        String recipientEmail = "alaabdulmalik03@gmail.com";
         String message = "<p>testing our mail service</p>";
         String mailSender = "noreply@promiscuous.com";
         String subject = "test email";

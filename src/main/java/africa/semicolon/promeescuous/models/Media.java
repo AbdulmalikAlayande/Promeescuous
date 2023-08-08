@@ -1,11 +1,18 @@
 package africa.semicolon.promeescuous.models;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.math.BigInteger;
 import java.util.List;
 
 @Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Media {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -14,8 +21,8 @@ public class Media {
     @ElementCollection
     @Enumerated(value = EnumType.STRING)
     private List<Reaction> reactions;
-    @Column(unique = true, columnDefinition = "MEDIUMTEXT", length = 1000)
+    @Column(unique = true, length = 300)
     private String url;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.DETACH)
     private User user;
 }
