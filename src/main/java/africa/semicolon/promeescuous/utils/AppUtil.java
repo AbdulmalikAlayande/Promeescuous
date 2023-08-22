@@ -5,6 +5,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.JWTVerifier;
 
 import java.io.IOException;
 import java.net.URI;
@@ -54,8 +55,24 @@ public class AppUtil {
 		return claim.asMap().get("user mail").toString();
 	}
 	
-	public static String isValidToken(String token){
-//		JWT.require(Algorithm.HMAC512("secret")).withIssuer("Promiscuous Incorporation").withClaim()
-		return null;
+	public static boolean isValidToken(String token){
+		JWTVerifier verifier = JWT.require(Algorithm.HMAC512("secret"))
+				                       .withIssuer("Promiscuous Incorporation")
+				                       .withClaimPresence("user")
+				                       .build();
+		return verifier.verify(token)!=null;
+	}
+	
+	public static boolean isValidJwt(String token){
+		JWTVerifier verifier = JWT.require(Algorithm.HMAC512("secret"))
+				                       .withIssuer("Promiscuous Incorporation")
+				                       .withClaimPresence("user")
+				                       .build();
+		return verifier.verify(token)!=null;
+	}
+	
+	public static String extractEmailFrom(String token){
+		var claim = JWT.decode(token).getClaim("user");
+		return (String) claim.asMap().get("user");
 	}
 }
