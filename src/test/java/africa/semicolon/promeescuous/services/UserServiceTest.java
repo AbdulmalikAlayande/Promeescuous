@@ -96,23 +96,21 @@ public class UserServiceTest {
         GetUserResponse userResponse = userService.getUserById(500L);
         
         String fullName = userResponse.getFullName();
-        String expectedFullName = new StringBuilder().append(updateUserRequest.getFirstName())
-                                          .append(" ")
-                                          .append(updateUserRequest.getLastName())
-                                          .toString();
+        String expectedFullName = updateUserRequest.getFirstName()+" "+updateUserRequest.getLastName();
         assertThat(fullName).isEqualTo(expectedFullName);
-        
     }
     
     private UpdateUserRequest buildUpdateRequest() {
-        Set<String> interests = Set.of("Swimming", "Sports", "Cooking");
+        Set<String> interests = Set.of("swimming", "sports", "cooking");
         UpdateUserRequest updateUserRequest = new UpdateUserRequest();
         updateUserRequest.setDateOfBirth(LocalDate.of(2005, Month.NOVEMBER.ordinal(), 25));
         updateUserRequest.setFirstName("Sheriff");
         updateUserRequest.setLastName("Awofiranye");
+        updateUserRequest.setPassword("password");
         MultipartFile testImage = getTestImage();
         updateUserRequest.setProfileImage(testImage);
         updateUserRequest.setInterests(interests);
+        updateUserRequest.setCountry("Ghana");
         return updateUserRequest;
     }
     
@@ -122,11 +120,9 @@ public class UserServiceTest {
         //create stream that can read from file pointed to by path
         try(InputStream inputStream = Files.newInputStream(path)) {
             //create a MultipartFile using bytes from file pointed to by path
-            MultipartFile image = new MockMultipartFile("test_image", inputStream);
-            return image;
+	        return new MockMultipartFile("test_image", inputStream);
         }catch (Exception exception){
             throw new PromiscuousBaseException(exception.getMessage());
         }
     }
-    
 }

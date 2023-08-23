@@ -32,6 +32,7 @@ import java.util.*;
 
 import static africa.semicolon.promeescuous.dtos.responses.ResponseMessages.ACCOUNT_ACTIVATION_SUCCESSFUL;
 import static africa.semicolon.promeescuous.dtos.responses.ResponseMessages.USER_REGISTRATION_SUCCESSFUL;
+import static africa.semicolon.promeescuous.dtos.responses.SuccessResponse.UPDATE_SUCCESSFUL;
 import static africa.semicolon.promeescuous.exceptions.ExceptionMessage.*;
 import static africa.semicolon.promeescuous.utils.AppUtil.*;
 import static java.util.regex.Pattern.matches;
@@ -156,7 +157,7 @@ public class PromiscuousUserService implements UserService{
             //4. Save updatedUser from step 3 in the DB
             var savedUser=userRepository.save(user);
             log.info("user-->{}", savedUser);
-            return new UpdateUserResponse("Update Successful");
+            return new UpdateUserResponse(UPDATE_SUCCESSFUL.getName());
         }catch (JsonPatchException exception){
             throw new PromiscuousBaseException(exception.getMessage());
         }

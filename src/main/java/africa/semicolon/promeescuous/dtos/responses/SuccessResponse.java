@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum SuccessResponse {
 	
 	REGISTRATION_SUCCESSFUL("Registration Successful, check your email inbox for verification token"),
-	UPDATE_SUCCESSFUL("");
+	UPDATE_SUCCESSFUL("Update Successful");
 	
 	private final String name;
 	SuccessResponse(String name) {

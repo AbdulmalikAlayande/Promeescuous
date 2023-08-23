@@ -9,12 +9,18 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableAutoConfiguration
+@Getter
 public class AppConfig {
     @Value("${mail.api.key}")
     private String mailApiKey;
-    @Getter
     @Value("${app.dev.testtoken}")
     private String testToken;
+    @Value("${cloud.api.key}")
+    private String cloudApiKey;
+    @Value("${cloud.api.name}")
+    private String cloudApiName;
+    @Value("${cloud.api.secret}")
+    private String cloudApiSecret;
     
    @Bean
     public String getMailApiKey(){
