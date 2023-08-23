@@ -1,7 +1,10 @@
 package africa.semicolon.promeescuous.services;
 
+import africa.semicolon.promeescuous.config.AppConfig;
 import africa.semicolon.promeescuous.dtos.requests.*;
 import africa.semicolon.promeescuous.dtos.responses.*;
+import africa.semicolon.promeescuous.exceptions.PromiscuousBaseException;
+import africa.semicolon.promeescuous.models.Address;
 import africa.semicolon.promeescuous.models.Interests;
 import africa.semicolon.promeescuous.models.User;
 import africa.semicolon.promeescuous.repositories.UserRepository;
@@ -9,9 +12,12 @@ import africa.semicolon.promeescuous.repositories.UserRepository;
 import africa.semicolon.promeescuous.exceptions.AccountActivationFailedException;
 import africa.semicolon.promeescuous.exceptions.BadCredentialsException;
 import africa.semicolon.promeescuous.exceptions.UserNotFoundException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.github.fge.jsonpatch.ReplaceOperation;
 import lombok.AllArgsConstructor;
@@ -25,11 +31,13 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 import static africa.semicolon.promeescuous.dtos.responses.ResponseMessages.ACCOUNT_ACTIVATION_SUCCESSFUL;
+import static africa.semicolon.promeescuous.dtos.responses.ResponseMessages.USER_REGISTRATION_SUCCESSFUL;
 import static africa.semicolon.promeescuous.exceptions.ExceptionMessage.*;
 import static africa.semicolon.promeescuous.utils.AppUtil.*;
 import static java.util.regex.Pattern.matches;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -42,6 +50,8 @@ public class PromiscuousUserService implements UserService{
     private final UserRepository userRepository;
     private final MailService mailService;
     private final ModelMapper mapper;
+    private AppConfig appConfig;
+    private CloudService cloudService;
 
     @Override
     public RegisterUserResponse register(RegisterUserRequest registerUserRequest) throws URISyntaxException, IOException {
@@ -54,8 +64,7 @@ public class PromiscuousUserService implements UserService{
         String emailResponse = mailService.send(savedUser);
         log.info("email sending response->{}", emailResponse);
         RegisterUserResponse registerUserResponse = new RegisterUserResponse();
-        registerUserResponse.setMessage("Registration Successful, check your email inbox for verification token");
-        
+        registerUserResponse.setMessage(USER_REGISTRATION_SUCCESSFUL.getName());
         return registerUserResponse;
     }
     
@@ -102,15 +111,9 @@ public class PromiscuousUserService implements UserService{
     
     @Override
     public List<GetUserResponse> getAllUsers(int page, int pageSize) {
-        List<GetUserResponse> users = new ArrayList<>();
         Pageable pageable = buildPageRequest(page, pageSize);
         Page<User> usersPage = userRepository.findAll(pageable);
         List<User> foundUsers = usersPage.getContent();
-//        for (User user:foundUsers) {
-//            GetUserResponse getUserResponse = buildGetUserResponse(user);
-//            users.add(getUserResponse);
-//        }
-//      return users;
         return foundUsers.stream()
                        .map(PromiscuousUserService::buildGetUserResponse)
                        .toList();
@@ -121,15 +124,42 @@ public class PromiscuousUserService implements UserService{
     @Override
     public UpdateUserResponse updateProfile(UpdateUserRequest updateUserRequest, Long id) {
         User user = findUserById(id);
+        
+        ApiResponse<String> url = uploadImage(updateUserRequest.getProfileImage());
         Set<String> userInterests = updateUserRequest.getInterests();
         Set<Interests> interests = parseInterestsFrom(userInterests);
         user.setInterests(interests);
+        
+        Address userAddress = user.getAddress();
+        mapper.map(updateUserRequest, userAddress);
+        user.setAddress(userAddress);
         JsonPatch updatePatch = buildUpdatePatch(updateUserRequest);
         return applyPatch(updatePatch, user);
     }
     
+    private ApiResponse<String> uploadImage(MultipartFile profileImage) {
+        boolean isFormWithProfileImage = profileImage !=null;
+        if (isFormWithProfileImage) return cloudService.upload(profileImage);
+        throw new RuntimeException(UPLOAD_FAILED_EXCEPTION.getMessage());
+    }
+    
     private UpdateUserResponse applyPatch(JsonPatch updatePatch, User user) {
-        return null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        //1. Convert user to JsonNode
+        JsonNode userNode = objectMapper.convertValue(user, JsonNode.class);
+        try {
+            //2. Apply patch to JsonNode from step 1
+            JsonNode updatedNode = updatePatch.apply(userNode);
+            //3. Convert updatedNode to user
+            user = objectMapper.convertValue(updatedNode, User.class);
+            log.info("user-->{}", user);
+            //4. Save updatedUser from step 3 in the DB
+            var savedUser=userRepository.save(user);
+            log.info("user-->{}", savedUser);
+            return new UpdateUserResponse("Update Successful");
+        }catch (JsonPatchException exception){
+            throw new PromiscuousBaseException(exception.getMessage());
+        }
     }
     
     private Set<Interests> parseInterestsFrom(Set<String> userInterests) {
@@ -140,25 +170,30 @@ public class PromiscuousUserService implements UserService{
     }
     
     private JsonPatch buildUpdatePatch(UpdateUserRequest updateUserRequest) {
-        JsonPatch patch;
         Field[] fields = updateUserRequest.getClass().getDeclaredFields();
         
         List<ReplaceOperation> operations=Arrays.stream(fields)
-                                                  .filter(field -> isFieldWithValue(field, updateUserRequest))
-                                                  .map(field->{
-                                                      try {
-                                                          String path = "/"+field.getName();
-                                                          JsonPointer pointer = new JsonPointer(path);
-                                                          String value = field.get(field.getName()).toString();
-                                                          TextNode node = new TextNode(value);
-	                                                      return new ReplaceOperation(pointer, node);
-                                                      } catch (Exception exception) {
-                                                          throw new RuntimeException(exception);
-                                                      }
-                                                  }).toList();
+                                                .filter(field -> isFieldWithValue(field, updateUserRequest))
+                                                .map(field-> buildReplaceOperation(updateUserRequest, field))
+                                                .toList();
         
         List<JsonPatchOperation> patchOperations = new ArrayList<>(operations);
         return new JsonPatch(patchOperations);
+    }
+    
+    
+    private static ReplaceOperation buildReplaceOperation(UpdateUserRequest updateUserRequest, Field field) {
+        field.setAccessible(true);
+        try {
+            log.info("field::{}", field);
+            String path = "/"+field.getName();
+            JsonPointer pointer = new JsonPointer(path);
+            Object value = field.get(updateUserRequest);
+            TextNode node = new TextNode(value.toString());
+            return new ReplaceOperation(pointer, node);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }
     }
     
     private boolean isFieldWithValue(Field field, UpdateUserRequest updateUserRequest) {
@@ -172,9 +207,7 @@ public class PromiscuousUserService implements UserService{
     
     private User findUserById(Long id){
         Optional<User> foundUser = userRepository.findById(id);
-        User user = foundUser.orElseThrow(()->
-                                                  new UserNotFoundException(USER_NOT_FOUND_EXCEPTION.getMessage()));
-        return user;
+	    return foundUser.orElseThrow(()-> new UserNotFoundException(USER_NOT_FOUND_EXCEPTION.getMessage()));
     }
     
     
@@ -201,9 +234,9 @@ public class PromiscuousUserService implements UserService{
     
     private static ActivateAccountResponse buildActivateUserResponse(GetUserResponse userResponse) {
         return ActivateAccountResponse.builder()
-                       .message(ACCOUNT_ACTIVATION_SUCCESSFUL.name())
-                       .user(userResponse)
-                       .build();
+                                      .message(ACCOUNT_ACTIVATION_SUCCESSFUL.name())
+                                      .user(userResponse)
+                                      .build();
     }
     
     private static GetUserResponse buildGetUserResponse(User savedUser) {

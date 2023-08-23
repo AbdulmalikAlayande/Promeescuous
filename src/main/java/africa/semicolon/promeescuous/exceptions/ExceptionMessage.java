@@ -11,7 +11,8 @@ public enum ExceptionMessage {
 	ACCOUNT_ACTIVATION_FAILED_EXCEPTION("Account activation was not successful"),
 	
 	INVALID_CREDENTIALS_EXCEPTION("Invalid authentication credentials"),
-	USER_REGISTRATION_FAILED_EXCEPTION("User registration failed");
+	USER_REGISTRATION_FAILED_EXCEPTION("User registration failed"),
+	UPLOAD_FAILED_EXCEPTION("image upload failed");
 	
 	ExceptionMessage(String message){
 		this.message=message;
