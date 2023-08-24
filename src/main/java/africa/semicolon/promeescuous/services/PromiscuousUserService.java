@@ -1,18 +1,19 @@
 package africa.semicolon.promeescuous.services;
 
 import africa.semicolon.promeescuous.config.AppConfig;
-import africa.semicolon.promeescuous.dtos.requests.*;
+import africa.semicolon.promeescuous.dtos.requests.LoginRequest;
+import africa.semicolon.promeescuous.dtos.requests.RegisterUserRequest;
+import africa.semicolon.promeescuous.dtos.requests.UpdateUserRequest;
 import africa.semicolon.promeescuous.dtos.responses.*;
+import africa.semicolon.promeescuous.exceptions.AccountActivationFailedException;
+import africa.semicolon.promeescuous.exceptions.BadCredentialsException;
 import africa.semicolon.promeescuous.exceptions.PromiscuousBaseException;
+import africa.semicolon.promeescuous.exceptions.UserNotFoundException;
 import africa.semicolon.promeescuous.models.Address;
 import africa.semicolon.promeescuous.models.Interests;
 import africa.semicolon.promeescuous.models.Location;
 import africa.semicolon.promeescuous.models.User;
 import africa.semicolon.promeescuous.repositories.UserRepository;
-
-import africa.semicolon.promeescuous.exceptions.AccountActivationFailedException;
-import africa.semicolon.promeescuous.exceptions.BadCredentialsException;
-import africa.semicolon.promeescuous.exceptions.UserNotFoundException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -21,16 +22,18 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.github.fge.jsonpatch.ReplaceOperation;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static africa.semicolon.promeescuous.dtos.responses.ResponseMessages.ACCOUNT_ACTIVATION_SUCCESSFUL;
 import static africa.semicolon.promeescuous.dtos.responses.ResponseMessages.USER_REGISTRATION_SUCCESSFUL;
@@ -38,14 +41,6 @@ import static africa.semicolon.promeescuous.dtos.responses.SuccessResponse.UPDAT
 import static africa.semicolon.promeescuous.exceptions.ExceptionMessage.*;
 import static africa.semicolon.promeescuous.utils.AppUtil.*;
 import static java.util.regex.Pattern.matches;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +55,7 @@ public class PromiscuousUserService implements UserService{
     private long testId;
 
     @Override
-    public RegisterUserResponse register(RegisterUserRequest registerUserRequest) throws URISyntaxException, IOException {
+    public RegisterUserResponse register(RegisterUserRequest registerUserRequest) {
         String email = registerUserRequest.getEmail();
         String password = registerUserRequest.getPassword();
         User user = new User();
@@ -68,8 +63,8 @@ public class PromiscuousUserService implements UserService{
         user.setPassword(password);
         User savedUser = userRepository.save(user);
         testId = savedUser.getId();
-        String emailResponse = mailService.send(savedUser);
-        log.info("email sending response->{}", emailResponse);
+//        String emailResponse = mailService.send(savedUser);
+//        log.info("email sending response->{}", emailResponse);
         RegisterUserResponse registerUserResponse = new RegisterUserResponse();
         registerUserResponse.setMessage(USER_REGISTRATION_SUCCESSFUL.getName());
         return registerUserResponse;
@@ -135,14 +130,19 @@ public class PromiscuousUserService implements UserService{
     
     @Override
     public UpdateUserResponse updateProfile(UpdateUserRequest updateUserRequest, Long id) {
+        System.out.println("this is id: "+id);
         User user = findUserById(id);
-        
-        ApiResponse<String> url = uploadImage(updateUserRequest.getProfileImage());
-        Set<String> userInterests = updateUserRequest.getInterests();
-        Set<Interests> interests = parseInterestsFrom(userInterests);
-        user.setInterests(interests);
+        if (updateUserRequest.getProfileImage() != null) {
+            ApiResponse<String> url = uploadImage(updateUserRequest.getProfileImage());
+        }
+        if (updateUserRequest.getInterests() != null){
+            Set<String> userInterests = updateUserRequest.getInterests();
+            Set<Interests> interests = parseInterestsFrom(userInterests);
+            user.setInterests(interests);
+        }
         
         Address userAddress = user.getAddress();
+        log.info("address {}", userAddress);
         mapper.map(updateUserRequest, userAddress);
         user.setAddress(userAddress);
         JsonPatch updatePatch = buildUpdatePatch(updateUserRequest);
