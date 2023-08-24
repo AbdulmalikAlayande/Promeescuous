@@ -43,6 +43,9 @@ public class AddressServiceTest {
 	@Test void getAddressByCountryAndState(){
 		GetAddressResponse foundAddress = addressService.getAddressBy("Nigeria", "Lagos");
 		assertThat(foundAddress).isNotNull();
+		assertThat(foundAddress.country()).isEqualTo("Nigeria");
+		assertThat(foundAddress.state()).isEqualTo("Lagos");
+		assertThat(foundAddress.id()).isNotNull();
 	}
 	
 	private static AddressCreationRequest buildCreationRequest() {

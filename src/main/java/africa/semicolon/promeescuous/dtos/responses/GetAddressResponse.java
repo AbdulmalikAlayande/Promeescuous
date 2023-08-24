@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record GetAddressResponse(
+		Long id,
 		String street,
 		String houseNumber,
 		String state,

@@ -7,6 +7,7 @@ import africa.semicolon.promeescuous.dtos.requests.UpdateUserRequest;
 import africa.semicolon.promeescuous.dtos.responses.*;
 import africa.semicolon.promeescuous.exceptions.BadCredentialsException;
 import africa.semicolon.promeescuous.exceptions.PromiscuousBaseException;
+import africa.semicolon.promeescuous.models.Location;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,5 +130,12 @@ public class UserServiceTest {
         }catch (Exception exception){
             throw new PromiscuousBaseException(exception.getMessage());
         }
+    }
+   
+    @Test
+    public void testUserSuggestionBasedOnLocation(){
+        List<GetUserResponse> suggestedFriends = userService.suggestFriendsBasedOn(Location.of("Nigeria", "Lagos"));
+        assertThat(suggestedFriends.size()).isNotZero();
+        assertThat(suggestedFriends.stream().findAny().isPresent()).isTrue();
     }
 }

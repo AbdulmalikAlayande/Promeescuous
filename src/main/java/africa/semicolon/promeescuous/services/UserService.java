@@ -4,6 +4,7 @@ import africa.semicolon.promeescuous.dtos.requests.LoginRequest;
 import africa.semicolon.promeescuous.dtos.requests.RegisterUserRequest;
 import africa.semicolon.promeescuous.dtos.requests.UpdateUserRequest;
 import africa.semicolon.promeescuous.dtos.responses.*;
+import africa.semicolon.promeescuous.models.Location;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -21,6 +22,6 @@ public interface UserService {
     List<GetUserResponse> getAllUsers(int page, int pageSize);
     
     UpdateUserResponse updateProfile(UpdateUserRequest updateUserRequest, Long id);
-    
+    List<GetUserResponse> suggestFriendsBasedOn(Location location);
     void deleteAll();
 }

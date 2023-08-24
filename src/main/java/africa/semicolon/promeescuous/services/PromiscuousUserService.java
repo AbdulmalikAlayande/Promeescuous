@@ -6,6 +6,7 @@ import africa.semicolon.promeescuous.dtos.responses.*;
 import africa.semicolon.promeescuous.exceptions.PromiscuousBaseException;
 import africa.semicolon.promeescuous.models.Address;
 import africa.semicolon.promeescuous.models.Interests;
+import africa.semicolon.promeescuous.models.Location;
 import africa.semicolon.promeescuous.models.User;
 import africa.semicolon.promeescuous.repositories.UserRepository;
 
@@ -204,6 +205,12 @@ public class PromiscuousUserService implements UserService{
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    @Override
+    public List<GetUserResponse> suggestFriendsBasedOn(Location location) {
+        
+        return null;
     }
     
     private User findUserById(Long id){
