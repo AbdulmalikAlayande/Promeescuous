@@ -4,7 +4,8 @@ import lombok.*;
 
 @Setter
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @ToString
 public class ApiResponse <T>{

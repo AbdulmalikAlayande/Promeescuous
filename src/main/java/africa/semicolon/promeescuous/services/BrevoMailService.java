@@ -3,6 +3,7 @@ package africa.semicolon.promeescuous.services;
 import africa.semicolon.promeescuous.config.AppConfig;
 import africa.semicolon.promeescuous.dtos.requests.EmailNotificationRequest;
 import africa.semicolon.promeescuous.dtos.requests.Recipient;
+import africa.semicolon.promeescuous.dtos.requests.Sender;
 import africa.semicolon.promeescuous.dtos.responses.EmailNotificationResponse;
 import africa.semicolon.promeescuous.models.User;
 import africa.semicolon.promeescuous.utils.AppUtil;
@@ -13,12 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -45,7 +41,9 @@ public class BrevoMailService implements MailService{
         EmailNotificationRequest notificationRequest = new EmailNotificationRequest();
         notificationRequest.setMailContent(AppUtil.getMailTemplate());
         Recipient recipient = new Recipient(user.getEmail());
-        notificationRequest.setRecipients(List.of(recipient));
+        notificationRequest.setTo(List.of(recipient));
+        notificationRequest.setSubject("Registration Confirmation");
+        notificationRequest.setSender(Sender.builder().email("noreply@gmail.com").name("no-reply").build());
         EmailNotificationResponse response = send(notificationRequest);
         return response.getMessageId();
     }

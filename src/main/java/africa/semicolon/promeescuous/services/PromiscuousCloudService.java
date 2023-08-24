@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@RequiredArgsConstructor
 @AllArgsConstructor
 public class PromiscuousCloudService implements CloudService{
 	@Override

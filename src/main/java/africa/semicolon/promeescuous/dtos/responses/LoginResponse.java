@@ -1,11 +1,10 @@
 package africa.semicolon.promeescuous.dtos.responses;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Data
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class LoginResponse {
 	private String accessToken;

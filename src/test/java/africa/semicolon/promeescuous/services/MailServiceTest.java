@@ -30,7 +30,7 @@ public class MailServiceTest {
 
         request = new EmailNotificationRequest();
         request.setMailContent(message);
-        request.setRecipients(List.of(new Recipient(recipientEmail)));
+        request.setTo(List.of(new Recipient(recipientEmail)));
         request.setSubject(subject);
         request.setSender(new Sender(mailSender));
     }

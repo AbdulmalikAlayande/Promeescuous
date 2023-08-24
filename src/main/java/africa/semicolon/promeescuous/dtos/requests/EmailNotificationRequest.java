@@ -13,19 +13,13 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class EmailNotificationRequest {
-    private Sender sender;
-    //to
     @JsonProperty("to")
-    private List<Recipient> recipients;
-    //cc
+    private List<Recipient> to;
+    private Sender sender;
     @JsonProperty("cc")
     private List<String> copiedEmails;
-
-    //htmlContent
     @JsonProperty("htmlContent")
     private String mailContent;
-
     private String textContent;
-
     private String subject;
 }

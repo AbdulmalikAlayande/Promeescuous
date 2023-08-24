@@ -116,7 +116,7 @@ public class PromiscuousUserService implements UserService{
         Page<User> usersPage = userRepository.findAll(pageable);
         List<User> foundUsers = usersPage.getContent();
         return foundUsers.stream()
-                       .map(PromiscuousUserService::buildGetUserResponse)
+                       .map(user-> buildGetUserResponse(user))
                        .toList();
     }
     
@@ -233,6 +233,11 @@ public class PromiscuousUserService implements UserService{
         return ApiResponse.builder().data(activateUserResponse).build();
     }
     
+    @Override
+    public void deleteAll() {
+        userRepository.deleteAll();
+    }
+    
     private static ActivateAccountResponse buildActivateUserResponse(GetUserResponse userResponse) {
         return ActivateAccountResponse.builder()
                                       .message(ACCOUNT_ACTIVATION_SUCCESSFUL.name())
@@ -240,7 +245,7 @@ public class PromiscuousUserService implements UserService{
                                       .build();
     }
     
-    private static GetUserResponse buildGetUserResponse(User savedUser) {
+    private GetUserResponse buildGetUserResponse(User savedUser) {
         return GetUserResponse.builder()
                        .id(savedUser.getId())
                        .address(savedUser.getAddress().toString())

@@ -3,7 +3,8 @@ package africa.semicolon.promeescuous.dtos.responses;
 import lombok.*;
 
 @Data
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class GetUserResponse {
 	private Long id;

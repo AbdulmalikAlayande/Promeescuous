@@ -21,4 +21,6 @@ public interface UserService {
     List<GetUserResponse> getAllUsers(int page, int pageSize);
     
     UpdateUserResponse updateProfile(UpdateUserRequest updateUserRequest, Long id);
+    
+    void deleteAll();
 }

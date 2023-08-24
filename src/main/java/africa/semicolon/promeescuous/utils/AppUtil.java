@@ -18,15 +18,14 @@ import java.util.List;
 
 public class AppUtil {
 	
-	private static final String TEMPLATE_FILE_PATH  = "C:\\Users\\USER\\IdeaProjects\\promeescuous\\promiscuous\\src\\main\\resources\\templates\\index.html";
+	private static final String TEMPLATE_FILE_PATH  = "file:///C:/Users/USER/IdeaProjects/promeescuous/promiscuous/src/main/resources/templates/index.html";
 	
 	public static String generateValidationToken(String email){
 		JWTCreator.Builder tokenCreator = JWT.create()
 				.withClaim("user mail", email)
 				.withExpiresAt(Instant.now().plusSeconds(3600))
 				.withIssuer("Promiscuous Incorporation")
-				.withIssuedAt(Instant.now())
-				.withHeader("");
+				.withIssuedAt(Instant.now());
 		return tokenCreator.sign(Algorithm.HMAC512("secret"));
 	}
 	
