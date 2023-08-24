@@ -133,7 +133,18 @@ public class UserServiceTest {
     }
    
     @Test
+    @SneakyThrows
     public void testUserSuggestionBasedOnLocation(){
+        userService.register(RegisterUserRequest.builder()
+                                     .email("alaabdulmalik03@gmail.com")
+                                     .password("ayanniyi@20")
+                                     .build());
+        userService.updateProfile(UpdateUserRequest.builder()
+                                          .country("Nigeria")
+                                          .state("Lagos")
+                                          .firstName("Abdulmalik")
+                                          .lastName("Alayande")
+                                          .build(), userService.getTestId());
         List<GetUserResponse> suggestedFriends = userService.suggestFriendsBasedOn(Location.of("Nigeria", "Lagos"));
         assertThat(suggestedFriends.size()).isNotZero();
         assertThat(suggestedFriends.stream().findAny().isPresent()).isTrue();

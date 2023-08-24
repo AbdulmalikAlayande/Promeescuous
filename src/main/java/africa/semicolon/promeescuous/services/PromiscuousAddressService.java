@@ -7,6 +7,7 @@ import africa.semicolon.promeescuous.dtos.responses.AddressUpdateResponse;
 import africa.semicolon.promeescuous.dtos.responses.GetAddressResponse;
 import africa.semicolon.promeescuous.exceptions.PromiscuousBaseException;
 import africa.semicolon.promeescuous.models.Address;
+import africa.semicolon.promeescuous.models.Location;
 import africa.semicolon.promeescuous.repositories.AddressRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,11 +22,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -60,9 +59,7 @@ public class PromiscuousAddressService implements AddressService{
 		Field[] fields = addressUpdateRequest.getClass().getDeclaredFields();
 		List<ReplaceOperation> operations = Arrays.stream(fields)
 				                          .filter(field -> filterEmptyFields(addressUpdateRequest, field))
-				                          .map(field -> {
-					                          return performReplaceOperation(addressUpdateRequest, field);
-				                          }).toList();
+				                          .map(field -> performReplaceOperation(addressUpdateRequest, field)).toList();
 		List<JsonPatchOperation> patchOperations = new ArrayList<>(operations);
 		return new JsonPatch(patchOperations);
 	}
@@ -99,17 +96,24 @@ public class PromiscuousAddressService implements AddressService{
 	
 	@Override
 	public List<GetAddressResponse> getAllAddresses() {
-		return null;
+		return addressRepository.findAll()
+							    .stream()
+							    .map(address -> mapper.map(address, GetAddressResponse.class))
+							    .collect(Collectors.toList());
 	}
 	
 	@Override
 	public GetAddressResponse getAddressById(Long id) {
+		
 		return null;
 	}
 	
 	@Override
-	public GetAddressResponse getAddressBy(String country, String state) {
-		return null;
+	public List<GetAddressResponse> getAddressBy(Location location) {
+		List<Address> matchedAddresses = addressRepository.readAddressByCountryAndState(location.getCountry(), location.getState());
+		return matchedAddresses.stream()
+				               .map(address -> mapper.map(address, GetAddressResponse.class))
+				               .collect(Collectors.toList());
 	}
 	
 	@Override

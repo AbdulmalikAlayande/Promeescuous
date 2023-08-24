@@ -1,14 +1,20 @@
 package africa.semicolon.promeescuous.dtos.responses;
 
-import lombok.Builder;
 
-@Builder
-public record GetAddressResponse(
-		Long id,
-		String street,
-		String houseNumber,
-		String state,
-		String country,
-		String message
-) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class GetAddressResponse {
+	private Long id;
+	private String street;
+	private String houseNumber;
+	private String state;
+	private String country;
+	private String message;
 }

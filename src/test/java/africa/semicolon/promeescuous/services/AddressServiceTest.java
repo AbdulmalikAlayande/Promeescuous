@@ -5,10 +5,13 @@ import africa.semicolon.promeescuous.dtos.requests.AddressUpdateRequest;
 import africa.semicolon.promeescuous.dtos.responses.AddressCreationResponse;
 import africa.semicolon.promeescuous.dtos.responses.AddressUpdateResponse;
 import africa.semicolon.promeescuous.dtos.responses.GetAddressResponse;
+import africa.semicolon.promeescuous.models.Location;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -32,8 +35,8 @@ public class AddressServiceTest {
 	@Test void updateAddressTest(){
 		AddressUpdateRequest addressUpdateRequest = buildUpdateRequest();
 		AddressUpdateResponse updateResponse = addressService.updateAddress(addressUpdateRequest);
-		assertThat(updateResponse.country()).isEqualTo(addressUpdateRequest.country());
-		assertThat(updateResponse.state()).isEqualTo(updateResponse.state());
+		assertThat(updateResponse.getCountry()).isEqualTo(addressUpdateRequest.country());
+		assertThat(updateResponse.getState()).isEqualTo(updateResponse.getState());
 	}
 	
 	@Test void getAllAddressesTest(){
@@ -41,11 +44,13 @@ public class AddressServiceTest {
 	}
 	
 	@Test void getAddressByCountryAndState(){
-		GetAddressResponse foundAddress = addressService.getAddressBy("Nigeria", "Lagos");
+		List<GetAddressResponse> foundAddress = addressService.getAddressBy(Location.of("Nigeria", "Lagos"));
 		assertThat(foundAddress).isNotNull();
-		assertThat(foundAddress.country()).isEqualTo("Nigeria");
-		assertThat(foundAddress.state()).isEqualTo("Lagos");
-		assertThat(foundAddress.id()).isNotNull();
+		foundAddress.forEach(address->{
+			assertThat(address.getCountry()).isEqualTo("Nigeria");
+			assertThat(address.getState()).isEqualTo("Lagos");
+			assertThat(address.getId()).isNotNull();
+		});
 	}
 	
 	private static AddressCreationRequest buildCreationRequest() {

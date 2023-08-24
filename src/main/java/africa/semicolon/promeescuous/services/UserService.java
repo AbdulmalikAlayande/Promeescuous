@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface UserService {
     RegisterUserResponse register(RegisterUserRequest registerUserRequest) throws URISyntaxException, IOException;
+    long getTestId();
     
     LoginResponse login(LoginRequest loginRequest);
     

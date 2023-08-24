@@ -22,6 +22,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.github.fge.jsonpatch.ReplaceOperation;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,14 +40,15 @@ import static africa.semicolon.promeescuous.utils.AppUtil.*;
 import static java.util.regex.Pattern.matches;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.stream.Collectors;
 
-@Repository
-@AllArgsConstructor
+@Service
+@RequiredArgsConstructor
 @Slf4j
 public class PromiscuousUserService implements UserService{
     private final UserRepository userRepository;
@@ -54,6 +56,8 @@ public class PromiscuousUserService implements UserService{
     private final ModelMapper mapper;
     private AppConfig appConfig;
     private CloudService cloudService;
+    private AddressService addressService;
+    private long testId;
 
     @Override
     public RegisterUserResponse register(RegisterUserRequest registerUserRequest) throws URISyntaxException, IOException {
@@ -63,11 +67,17 @@ public class PromiscuousUserService implements UserService{
         user.setEmail(email);
         user.setPassword(password);
         User savedUser = userRepository.save(user);
+        testId = savedUser.getId();
         String emailResponse = mailService.send(savedUser);
         log.info("email sending response->{}", emailResponse);
         RegisterUserResponse registerUserResponse = new RegisterUserResponse();
         registerUserResponse.setMessage(USER_REGISTRATION_SUCCESSFUL.getName());
         return registerUserResponse;
+    }
+    
+    @Override
+    public long getTestId() {
+        return testId;
     }
     
     @Override
@@ -209,8 +219,16 @@ public class PromiscuousUserService implements UserService{
     
     @Override
     public List<GetUserResponse> suggestFriendsBasedOn(Location location) {
-        
-        return null;
+        List<GetAddressResponse> matchedAddresses = addressService.getAddressBy(location);
+        List<GetUserResponse> suggestedFriends = new ArrayList<>();
+        matchedAddresses.forEach(address->{
+            Optional<User> foundUser = userRepository.findById(address.getId());
+            foundUser.ifPresent(user -> {
+                GetUserResponse userResponse = mapper.map(user, GetUserResponse.class);
+                suggestedFriends.add(userResponse);
+            });
+        });
+        return suggestedFriends;
     }
     
     private User findUserById(Long id){
