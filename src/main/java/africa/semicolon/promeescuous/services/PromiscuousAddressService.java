@@ -104,7 +104,6 @@ public class PromiscuousAddressService implements AddressService{
 	
 	@Override
 	public GetAddressResponse getAddressById(Long id) {
-		
 		return null;
 	}
 	
